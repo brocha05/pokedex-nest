@@ -22,11 +22,7 @@ export class PokemonService {
       //Se hacen asincronas las funciones con async y la inserción como es asincrona se maneja con await
       return pokemon; 
     } catch (error) {
-      if(error.code === 11000){//Error donde encuentra llaves duplicadas
-        throw new BadRequestException(`Pokemon exists in db ${JSON.stringify(error.keyValue)}`)
-      }
-      console.log(error)
-      throw new InternalServerErrorException(`Can not create Pokemon - Check server logs`)
+      this.handleExceptions(error);
     }
   }
 
@@ -61,18 +57,35 @@ export class PokemonService {
 
   async update(term: string, updatePokemonDto: UpdatePokemonDto) {
     const pokemon = await this.findOne(term)//utilizamos el método anterior para comprobar que existe el pokemon
+    let exist: boolean;
 
-    if(updatePokemonDto.name) updatePokemonDto.name = updatePokemonDto.name.toLowerCase();
-    //Si el DTO trae un nombre lo estandarizamos a minusculas porque así lo guardamos en DB
+    if(updatePokemonDto.name){
+      updatePokemonDto.name = updatePokemonDto.name.toLowerCase();
+      //Si el DTO trae un nombre lo estandarizamos a minusculas porque así lo guardamos en DB
+    } 
 
-    await pokemon.updateOne(updatePokemonDto)//Utilizamos un método que nos provee el modelo de
-    //mongoose updateOne y le enviamos el DTO que recibimos
+    try {
+      await pokemon.updateOne(updatePokemonDto)//Utilizamos un método que nos provee el modelo de
+      //mongoose updateOne y le enviamos el DTO que recibimos
+    } catch (error) {
+      this.handleExceptions(error);
+    }
 
     return {...pokemon.toJSON(), ...updatePokemonDto };
     //Para lograr ver en Postman la data ya convertida sobreescribimos el pokemon 
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pokemon`;
+  async remove(id: string) {
+    return {id}
+    // const pokemon = await this.findOne(id)
+    // await pokemon.deleteOne();
+  }
+
+  private handleExceptions(error: any){
+    if(error.code === 11000){//Error donde encuentra llaves duplicadas
+      throw new BadRequestException(`Pokemon exists in db ${JSON.stringify(error.keyValue)}`)
+    }
+    console.log(error)
+    throw new InternalServerErrorException(`Can not create Pokemon - Check server logs`)
   }
 }
