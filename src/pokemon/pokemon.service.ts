@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { isValidObjectId, Model } from 'mongoose';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { Pokemon } from './entities/pokemon.entity';
@@ -34,12 +34,42 @@ export class PokemonService {
     return `This action returns all pokemon`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pokemon`;
+  async findOne(search: string) {
+
+    let pokemon: Pokemon;//Se declara un pokemon con la forma de la entidad 
+
+    //no
+    if(!isNaN(+search)){//Verificamos si es number lo que llegó
+      pokemon = await this.pokemonModel.findOne({no: search})//Se hace busqueda por no
+    }
+
+    //MongoID
+    if(!pokemon && isValidObjectId(search)){//Se verifica si es un id de mongo con isValidObjectId
+      pokemon = await this.pokemonModel.findById(search)//Se utiliza findById
+    }
+
+    //Name
+    if(!pokemon){//Si no hay nada se busca por nombre y se hacen minusculas y quitan espacios.
+      pokemon = await this.pokemonModel.findOne({name: search.toLowerCase().trim()})
+    }
+
+
+    if(!pokemon) throw new NotFoundException(`Pokemon with id, name or no: '${search}' not found.`)
+    //Si no lo encuentra tira una notFoundException
+    return pokemon;
   }
 
-  update(id: number, updatePokemonDto: UpdatePokemonDto) {
-    return `This action updates a #${id} pokemon`;
+  async update(term: string, updatePokemonDto: UpdatePokemonDto) {
+    const pokemon = await this.findOne(term)//utilizamos el método anterior para comprobar que existe el pokemon
+
+    if(updatePokemonDto.name) updatePokemonDto.name = updatePokemonDto.name.toLowerCase();
+    //Si el DTO trae un nombre lo estandarizamos a minusculas porque así lo guardamos en DB
+
+    await pokemon.updateOne(updatePokemonDto)//Utilizamos un método que nos provee el modelo de
+    //mongoose updateOne y le enviamos el DTO que recibimos
+
+    return {...pokemon.toJSON(), ...updatePokemonDto };
+    //Para lograr ver en Postman la data ya convertida sobreescribimos el pokemon 
   }
 
   remove(id: number) {
