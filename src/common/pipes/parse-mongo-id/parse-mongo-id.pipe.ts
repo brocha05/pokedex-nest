@@ -11,5 +11,5 @@ export class ParseMongoIdPipe implements PipeTransform {
     }
     //De otro modo quiere decir que es un mongoid válido y regresamos la misma data.
     return value;
-  }
+  } 
 }
