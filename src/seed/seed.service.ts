@@ -24,7 +24,7 @@ export class SeedService {
     //Se obtiene el número del Pokemon ya que no existia en sus atributos.
     data.results.forEach( async ({ name, url }) => {
       const no = +url.split('/').at(-2);
-      const pokemon = await this.pokemonModel.create({name, no})
+      const pokemon = await this.pokemonModel.create({name, no})//Usamos el modelo importado desde el otro módulo para insertar
     });
 
     return 'Seed executed';
