@@ -16,16 +16,24 @@ export class SeedService {
     //genérico le pasamos nuestro Modelo.
   ){}
 
+  
+
   async executeSeed() {
+    await this.pokemonModel.deleteMany({});
     //Se realiza petición HTTP con axios y se typea la respuesta con la interfaz creada PokeResponse
     const { data } = await this.axios.get<PokeResponse>(
       'https://pokeapi.co/api/v2/pokemon?limit=20',
     );
+    
+    const pokemonToInsert: {name: string, no: number}[] = [];//Creamos objeto contenedor de pokemons para insertar
+
     //Se obtiene el número del Pokemon ya que no existia en sus atributos.
-    data.results.forEach( async ({ name, url }) => {
+    data.results.forEach( ({ name, url }) => {
       const no = +url.split('/').at(-2);
-      const pokemon = await this.pokemonModel.create({name, no})//Usamos el modelo importado desde el otro módulo para insertar
+      pokemonToInsert.push({name, no})//Usamos el modelo importado desde el otro módulo para insertar
     });
+
+    await this.pokemonModel.insertMany( pokemonToInsert ); //Sólo utilizamos una inserción para todos los pokemons
 
     return 'Seed executed';
   }
