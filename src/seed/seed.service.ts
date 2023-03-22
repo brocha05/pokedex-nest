@@ -22,7 +22,7 @@ export class SeedService {
     await this.pokemonModel.deleteMany({});
     //Se realiza petición HTTP con axios y se typea la respuesta con la interfaz creada PokeResponse
     const { data } = await this.axios.get<PokeResponse>(
-      'https://pokeapi.co/api/v2/pokemon?limit=20',
+      'https://pokeapi.co/api/v2/pokemon?limit=650',
     );
     
     const pokemonToInsert: {name: string, no: number}[] = [];//Creamos objeto contenedor de pokemons para insertar

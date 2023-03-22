@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, Query } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model } from 'mongoose';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { Pokemon } from './entities/pokemon.entity';
@@ -26,8 +27,9 @@ export class PokemonService {
     }
   }
 
-  findAll() {
-    return this.pokemonModel.find({});
+  findAll(@Query() paginationDto?: PaginationDto) {
+    console.log(paginationDto)
+    return this.pokemonModel.find({})
   }
 
   async findOne(search: string) {
