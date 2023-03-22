@@ -29,14 +29,15 @@ export class PokemonService {
 
   findAll(paginationDto: PaginationDto) {
 
-    const {limit = 10, offset = 0} = paginationDto;
+    const {limit = 10, offset = 0} = paginationDto;//Extraemos el límite y el offset con valores por defecto
+    //agregamos los métodos para paginar  
     return this.pokemonModel.find({})
       .limit(limit)
       .skip(offset)
       .sort({
         no: 1
       })
-      .select('-__v')
+      .select('-__v')//Omitimos el campo __v
   }
 
   async findOne(search: string) {

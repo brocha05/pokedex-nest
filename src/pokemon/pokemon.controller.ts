@@ -17,7 +17,7 @@ export class PokemonController {
   }
 
   @Get()
-  findAll(@Query() paginationDto: PaginationDto) {
+  findAll(@Query() paginationDto: PaginationDto) {//Usamos @Query para extraer los queryparams enviados al endpoint
     console.log(paginationDto)
     return this.pokemonService.findAll(paginationDto);
   }
